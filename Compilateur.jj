@@ -18,15 +18,15 @@ public class Compilateur {
 PARSER_END(Compilateur)
 
 SKIP :
-{ " " | "\t" }
+{ " " | "\t" | "\n"}
 TOKEN :
 { < NOMBRE: ["1"-"9"] (["0"-"9"])* >
-| < EOL: "\n" >
+    >
 }
 
 void mainNT () :
 {}
-{ expression() <EOL> }
+{ expression() ";"}
 
 void expression () :
 {}
