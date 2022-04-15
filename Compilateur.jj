@@ -5,28 +5,28 @@ import java.io.InputStream;
 public class Compilateur {
     public static void main(String args[]) {
         try {
-        Compilateur parseur = new Compilateur(System.in);
-        parseur.mainNT();
-        System.out.println("C'est bien une expression arithmetique");
+            Compilateur parseur = new Compilateur(System.in);
+            parseur.mainNT();
+            System.out.println("C'est bien une expression arithmetique");
         } catch (TokenMgrError e) {
-        System.out.println("Ceci n'est pas une expression arithmetique");
+            System.out.println("Ceci n'est pas une expression arithmetique");
         } catch (ParseException e) {
-        System.out.println("Ceci n'est pas une expression arithmetique");
+            System.out.println("Ceci n'est pas une expression arithmetique parseur ");
         }
     }
 }
 PARSER_END(Compilateur)
 
 SKIP :
-{ " " | "\t" | "\n"}
+{ " " | "\t" }
 TOKEN :
 { < NOMBRE: ["1"-"9"] (["0"-"9"])* >
-    >
+| < EOL: "\n" >
 }
 
 void mainNT () :
 {}
-{ expression() ";"}
+{ expression() <EOL> }
 
 void expression () :
 {}
