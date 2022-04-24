@@ -3,9 +3,10 @@
 %}
 
 %token <int> NOMBRE
-%token PLUS MOINS FOIS GPAREN DPAREN EOL
+%token PLUS MOINS FOIS GPAREN DPAREN EOL MOD
 %left PLUS MOINS
 %left FOIS
+%left MOD
 %nonassoc UMOINS
 %type <unit> main expression
 %start main
