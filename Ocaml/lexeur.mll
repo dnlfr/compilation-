@@ -5,7 +5,8 @@
 }
 
 rule token = parse
-  [' ' '\t' '\n'] { token lexbuf } 
+  [' ' '\t'] { token lexbuf } 
+  | ['\n'] { EOL }
   | ['0'-'9']+ { NOMBRE }
   | '+' { PLUS }
   | '-' { MOINS }
