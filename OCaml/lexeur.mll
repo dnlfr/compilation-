@@ -6,8 +6,8 @@
 
 rule token = parse
   [' ' '\t' '\n'] { token lexbuf } 
-  | ['0'-'9']+ ('.' | ('.'['0'-'9']+('e''-'?['0'-'9']+)?)?) as lexem { NOMBRE(float_of_string lexem) }
   | '+' { PLUS }
+  | ['0'-'9']+ ('.' | ('.'['0'-'9']+('e''-'?['0'-'9']+)?)?) as lexem { NOMBRE(float_of_string lexem) }
   | '-' { MOINS }
   | '*' { FOIS }
   | '(' { GPAREN }
