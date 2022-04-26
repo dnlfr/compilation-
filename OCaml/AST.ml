@@ -20,3 +20,12 @@ and print_AST form = let open Format in function
   | Neg    e    -> fprintf form "@[<2>%s@ %a@]" "Neg" print_AST e 
   | Num    n    -> fprintf form "@[<2>%s@ %i@]" "Num" n
 ;; 
+
+let rec print_post_fixe form g d s = Format.fprintf form "@[<2>%s@ %a%s@ %a%s@ %s@ %s@]" "\n" code g "\n" code d "\n" s "\n"
+
+and code form = let open Format in function 
+  | Num n -> fprintf "@[<2>%s@ %f@ %s@]" "CsteNb" n "\n"
+  | Plus  (g, d) -> print_post_fixe form "AddiNb" g d 
+  | Mult  (g, d) -> print_post_fixe form "MultNb" g d 
+  | Moins (g, d) -> print_post_fixe form "SubiNb"
+  | Neg   n ->  fprintf form "@[<2>%s@ %f@ %s@]" n "NegaNb\n"
