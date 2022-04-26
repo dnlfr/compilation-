@@ -2,9 +2,9 @@
 	open AST
 %}
 
-%token <int> NOMBRE
+%token <float> NOMBRE
 %token <bool> BOOLEAN
-%token PLUS MOINS FOIS GPAREN DPAREN EOL MOD GR_ST LE_ST EQ 
+%token PLUS MOINS FOIS GPAREN DPAREN EOL MOD GR_ST LE_ST EQ BOOL_NEG
 %left PLUS MOINS
 %left FOIS
 %left MOD
@@ -27,9 +27,10 @@ expression:
   | expression MOD expression { Mod ($1, $3) }
   | expression GR_ST expression { GrSt ($1, $3)}
   | expression LE_ST expression {LeSt ($1, $3)}
+  | expression EQ expression {Eq ($1, $3)}
   | GPAREN expression DPAREN { $2 }
   | BOOLEAN { Bool $1 }
-  | BOOL_NEG { BoolNeg ($)}
+  | BOOL_NEG expression { BoolNeg ($2)}
   | MOINS expression %prec UMOINS { Neg $2 }
   | NOMBRE { Num $1 }
 ;

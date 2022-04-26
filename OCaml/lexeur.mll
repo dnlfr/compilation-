@@ -13,7 +13,7 @@ rule token = parse
   | '(' { GPAREN }
   | ')' { DPAREN }
   | '%' { MOD }
-  | "==" { EQUAL }
+  | "==" { EQ }
   | "<=" { GR_ST }
   | '!' { BOOL_NEG }
   | '<' { LE_ST }

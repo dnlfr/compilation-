@@ -1,16 +1,16 @@
 type expression_a =
-  | Plus  of expression_a * expression_a
-  | Moins of expression_a * expression_a
-  | Mult  of expression_a * expression_a
-  | Div   of expression_a * expression_a
-  | Equal of expression_a * expression_a 
-  | GrSt  of expression_a * expression_a 
-  | LeSt  of expression_a * expression_a 
-  | NegBool of expression_a 
-  | Bool  of bool
-  | Neg   of expression_a
-  | Num   of float 
-  | Mod   of expression_a * expression_a
+  | Plus    of expression_a * expression_a
+  | Moins   of expression_a * expression_a
+  | Mult    of expression_a * expression_a
+  | Div     of expression_a * expression_a
+  | Eq      of expression_a * expression_a 
+  | GrSt    of expression_a * expression_a 
+  | LeSt    of expression_a * expression_a 
+  | BoolNeg of expression_a 
+  | Bool    of bool
+  | Neg     of expression_a
+  | Num     of float 
+  | Mod     of expression_a * expression_a
 ;;
 
 
@@ -30,10 +30,11 @@ and print_AST form = let open Format in function
 
 let rec print_post_fixe form g d s = Format.fprintf form "@[<2>%s@ %a%s@ %a%s@ %s@ %s@]" "\n" code g "\n" code d "\n" s "\n"
 
-and code form = let open Format in function 
+and code form = let open Format in function
   | Plus  (g, d) -> print_post_fixe form g d "AddiNb" 
   | Mult  (g, d) -> print_post_fixe form g d "MultNb" 
   | Moins (g, d) -> print_post_fixe form g d "SubiNb" 
   | Mod (g,d) -> print_post_fixe form g d "ModuNb" 
   | Num   n -> fprintf form "@[<2>%s@ %f@ %s@]" "CsteNb" n "\n"
   | Neg   e ->  fprintf form "@[<2>%a@ %s@]" code e "NegaNb\n"
+;;
