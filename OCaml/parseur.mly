@@ -1,8 +1,8 @@
 %{
-	open AST
+    open AST
 %}
 
-%token <int> NOMBRE
+%token <float> NOMBRE
 %token PLUS MOINS FOIS GPAREN DPAREN EOL MOD
 %left PLUS MOINS
 %left FOIS
@@ -14,13 +14,14 @@
 %%
 
 main:
-  expression EOL { $1 }
+  expression { $1 }
 ;
 expression:
   expression PLUS expression { Plus ($1,$3) }
   | expression MOINS expression { Moins($1,$3) }
   | expression FOIS expression { Mult ($1,$3) }
   | GPAREN expression DPAREN { $2 }
+  | expression MOD expression { Mod ($1, $3) }
   | MOINS expression %prec UMOINS { Neg $2 }
   | NOMBRE { Num $1 }
 ;

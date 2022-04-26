@@ -6,7 +6,7 @@
 
 rule token = parse
   [' ' '\t' '\n'] { token lexbuf } 
-  | ['0'-'9']+ ('.' | ('.'['0'-'9']+('e''-'?['0'-'9']+)?)?) as lexem { NOMBRE(int_of_string lexem) }
+  | ['0'-'9']+ ('.' | ('.'['0'-'9']+('e''-'?['0'-'9']+)?)?) as lexem { NOMBRE(float_ofstring lexem) }
   | '+' { PLUS }
   | '-' { MOINS }
   | '*' { FOIS }
@@ -14,4 +14,4 @@ rule token = parse
   | ')' { DPAREN }
   | '%' { MOD }
   | eof { raise Eof }
-  | _ { raise TokenInconu }
+  |  { raise TokenInconu }

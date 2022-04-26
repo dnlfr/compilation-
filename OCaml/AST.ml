@@ -4,8 +4,8 @@ type expression_a =
   | Mult  of expression_a * expression_a
   | Div   of expression_a * expression_a
   | Neg   of expression_a
-  | Num   of int * float 
-  | Mod   of expression_a * int
+  | Num   of float 
+  | Mod   of expression_a * expression_a
 ;;
 
 
@@ -20,15 +20,15 @@ and print_AST form = let open Format in function
   | Div   (g,d) -> print_binaire form "Div" g d
   | Mod   (g,d) -> print_binaire form "Mod" g d
   | Neg    e    -> fprintf form "@[<2>%s@ %a@]" "Neg" print_AST e 
-  | Num    n    -> fprintf form "@[<2>%s@ %i@]" "Num" n
+  | Num    n    -> fprintf form "@[<2>%s@ %f@]" "Num" n
 ;; 
 
 let rec print_post_fixe form g d s = Format.fprintf form "@[<2>%s@ %a%s@ %a%s@ %s@ %s@]" "\n" code g "\n" code d "\n" s "\n"
 
 and code form = let open Format in function 
-  | Num n -> fprintf "@[<2>%s@ %f@ %s@]" "CsteNb" n "\n"
-  | Plus  (g, d) -> print_post_fixe form "AddiNb" g d 
-  | Mult  (g, d) -> print_post_fixe form "MultNb" g d 
-  | Moins (g, d) -> print_post_fixe form "SubiNb" g d
-  | Mod (g,d) -> print_post_fixe form "ModuNb" g d 
-  | Neg   n ->  fprintf form "@[<2>%s@ %f@ %s@]" n "NegaNb\n"
+  | Plus  (g, d) -> print_post_fixe form g d "AddiNb" 
+  | Mult  (g, d) -> print_post_fixe form g d "MultNb" 
+  | Moins (g, d) -> print_post_fixe form g d "SubiNb" 
+  | Mod (g,d) -> print_post_fixe form g d "ModuNb" 
+  | Num   n -> fprintf form "@[<2>%s@ %f@ %s@]" "CsteNb" n "\n"
+  | Neg   e ->  fprintf form "@[<2>%a@ %s@]" code e "NegaNb\n"
