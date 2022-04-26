@@ -1,10 +1,14 @@
 %{
-	open AST
+    open AST
 %}
 
 %token <float> NOMBRE
+<<<<<<< HEAD
 %token <bool> BOOLEAN
 %token PLUS MOINS FOIS GPAREN DPAREN EOL MOD GR_ST LE_ST EQ BOOL_NEG
+=======
+%token PLUS MOINS FOIS GPAREN DPAREN EOL MOD
+>>>>>>> 0d9e2a48a1781779ff37ebc22c1cf5e2c8edb9bf
 %left PLUS MOINS
 %left FOIS
 %left MOD
