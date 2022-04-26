@@ -24,6 +24,7 @@ expression:
     expression PLUS expression { Plus ($1,$3) }
   | expression MOINS expression { Moins($1,$3) }
   | expression FOIS expression { Mult ($1,$3) }
+  | expression MOD expression { Mod ($1, $3) }
   | expression GR_ST expression { GrSt ($1, $3)}
   | expression LE_ST expression {LeSt ($1, $3)}
   | GPAREN expression DPAREN { $2 }
