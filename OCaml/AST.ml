@@ -30,5 +30,5 @@ and code form = let open Format in function
   | Plus  (g, d) -> print_post_fixe form "AddiNb" g d 
   | Mult  (g, d) -> print_post_fixe form "MultNb" g d 
   | Moins (g, d) -> print_post_fixe form "SubiNb" g d
-  | Mod (g,d) -> print_post_fixe form "Mod" g d 
+  | Mod (g,d) -> print_post_fixe form "ModuNb" g d 
   | Neg   n ->  fprintf form "@[<2>%s@ %f@ %s@]" n "NegaNb\n"
