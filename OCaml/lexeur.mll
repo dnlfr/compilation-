@@ -13,5 +13,10 @@ rule token = parse
   | '(' { GPAREN }
   | ')' { DPAREN }
   | '%' { MOD }
+  | "==" { EQUAL }
+  | "<=" { GR_ST }
+  | '!' { BOOL_NEG }
+  | '<' { LE_ST }
+  | "true" | "false" as lexem    									                   {   BOOLEAN (bool_of_string lexem)}
   | eof { raise Eof }
   | _ { raise TokenInconu }
