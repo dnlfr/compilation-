@@ -21,7 +21,7 @@ main:
   expression { $1 }
 ;
 expression:
-  expression PLUS expression { Plus ($1,$3) }
+    expression PLUS expression { Plus ($1,$3) }
   | expression MOINS expression { Moins($1,$3) }
   | expression FOIS expression { Mult ($1,$3) }
   | expression GR_ST expression { GrSt ($1, $3)}
