@@ -14,6 +14,8 @@ rule token = parse
   | '(' { GPAREN }
   | ')' { DPAREN }
   | '%' { MOD }
+  | '?' { TERC }
+  | ':' { TERS }
   | "NaN" as lexem { NAN (lexem) }
   | "==" { EQ }
   | "<=" { GR_ST }
@@ -21,4 +23,4 @@ rule token = parse
   | '<' { LE_ST }
   | "true" | "false" as lexem {   BOOLEAN (bool_of_string lexem)}
   | eof { raise Eof }
-  |  { raise TokenInconu }
+  | _ { raise TokenInconu }
