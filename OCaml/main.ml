@@ -23,7 +23,7 @@ let _ =                                          (*main en OCaml*)
 			let lexbuf = Lexing.from_channel (open_in Sys.argv.(1)) in (*lexeur sur le fichier entré en argument*)
 	    while true do                                (*on ne s'arrête pas*)
         Parseur.main Lexeur.token lexbuf (*parseur une ligne*)
-        |> Format.printf "%a\n%!" AST.print_AST_exp ;
+        |> Format.printf "%a\n%!" AST.print_AST ;
 	    done
 		  with
 		   | Lexeur.Eof          -> exit 0							 (*impossible*)

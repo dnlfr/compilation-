@@ -5,14 +5,19 @@
 }
 
 rule token = parse
-  [' ' '\t' '\n'] { token lexbuf } 
-  | ['0'-'9']+ ('.' | ('.'['0'-'9']+('e''-'?['0'-'9']+)?)?) as lexem { NOMBRE(float_of_string lexem) }
+  [' ' '\t' '\n'] { token lexbuf }
   | '+' { PLUS }
+  | ['0'-'9']+ ('.' | ('.'['0'-'9']+('e''-'?['0'-'9']+)?)?) as lexem { NOMBRE(float_of_string lexem) }
   | '-' { MOINS }
   | '*' { FOIS }
   | '(' { GPAREN }
   | ')' { DPAREN }
   | '%' { MOD }
+  | "==" { EQ }
+  | "<=" { GR_ST }
+  | '!' { BOOL_NEG }
+  | '<' { LE_ST }
   | ';' { PT_VIRG }
+  | "true" | "false" as lexem {   BOOLEAN (bool_of_string lexem)}
   | eof { raise Eof }
   | _ { raise TokenInconu }
