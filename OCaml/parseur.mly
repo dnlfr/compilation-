@@ -17,13 +17,23 @@
 %left BOOL_NEG
 %left TERC
 %nonassoc UMOINS
-%type <unit> main expression
-%start main
-%type <AST.expression_a> main expression
+%start main commande
+%type <AST.programme_a> main programme
+%type <AST.commande_a> commande 
+%type <AST.expression_a> expression
 %%
 
 main:
-  expression PT_VIRG { $1 }
+  commande programme { Prog ($1, $2, 0) }
+  | commande { Cmd ($1, 0)}
+;
+programme: 
+  commande programme { Prog ($1, $2, 0) }
+  | commande { Cmd ($1, 0) }
+;
+commande: 
+  expression PT_VIRG { Expr ($1, 0) }
+  | PT_VIRG { Pt_Virg ((), 0) }
 ;
 expression:
     expression PLUS expression { Plus ($1,$3, 0) }
@@ -37,12 +47,11 @@ expression:
   | expression AND expression { And ($1, $3, 0) }
   | expression OR expression { Or ($1, $3, 0) }
   | VAR AFFECT expression { Affect ($1, $3, 0)}
-  | GPAREN expression DPAREN { $2 } /* Paranthesage, pas besoin de definir la taille */
+  | GPAREN expression DPAREN { $2 } /* Parenthesage, pas besoin de definir la taille */
   | NAN { NaN ($1, 0) }
   | BOOLEAN { Bool ($1, 0) }
   | BOOL_NEG expression { BoolNeg ($2, 0)}
   | MOINS expression %prec UMOINS { Neg ($2, 0) }
-  | PT_VIRG { Pt_Virg ((),0) }
   | VAR { Var ($1, 0)}
   | NOMBRE { Num ($1, 0) }
 ;
