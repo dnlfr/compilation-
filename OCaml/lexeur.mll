@@ -25,6 +25,8 @@ rule token = parse
   | '<' { LE_ST }
   | ['a'-'z']['-' '_' '0'-'9' 'a'-'z' 'A'-'Z' ]* as lexem { VAR (lexem) }
   | '=' { AFFECT }
+  | "if" { IF }
+  | "else" { ELSE }
   | "true" | "false" as lexem {   BOOLEAN (bool_of_string lexem)}
   | eof { raise Eof }
   | ';' { PT_VIRG }
