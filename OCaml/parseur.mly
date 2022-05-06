@@ -35,7 +35,6 @@ commande:
   expression PT_VIRG { Expr ($1, 0) }
   | PT_VIRG { Pt_Virg ((), 0) }
   | IF GPAREN expression DPAREN commande ELSE commande { IfElse ($3, $5, $7, 0) }
-  | IF GPAREN expression DPAREN commande { Test ($3, $5) }
 ;
 expression:
     expression PLUS expression { Plus ($1,$3, 0) }
