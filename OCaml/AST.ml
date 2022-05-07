@@ -22,8 +22,7 @@ and commande_a =
   | Expr    of expression_a * int 
   | Pt_Virg of unit * int
   | IfElse  of expression_a * commande_a * commande_a * int
-  | Test    of expression_a * commande_a 
-
+  
 and programme_a = 
   | Prog    of commande_a * programme_a * int
   | Cmd     of commande_a * int
@@ -129,15 +128,13 @@ and code_exp form = let open Format in function
                               "\n Jump " (sizeOf_exp exp3) "\n"
                               code_exp exp3 "\n"
 and code_cmd form = let open Format in function 
-  | Expr (e,t) -> fprintf form "@[<2>%s%a%s@]" code_exp e "\n"
+  | Expr (e,t) -> fprintf form "@[<2>%a%s@]" code_exp e "\n"
   | Pt_Virg (u,t) -> fprintf form "@[<2>%s@]" "\n"
-  | IfElse (e,cmd1,cmd2,t) -> fprintf form "@[<2>%a%s%i@ %s@ %a@ %s%i%s@ %a%s@]"
+  | IfElse (e,cmd1,cmd2,t) -> fprintf form "@[<2>%a%s%i%s%a%s%i%s%a%s@]"
                               code_exp e "\nConJump " (sizeOf_cmd cmd1 + 1) "\n"
                               code_cmd cmd1
                               "\n Jump " (sizeOf_cmd cmd2) "\n"
                               code_cmd cmd2 "\n"
-  | Test (e,c) -> fprintf form "@[<2>%s@]" "Test"
-
 and code_prog form = let open Format in function 
   | Prog (c,p,t) -> fprintf form "@[<2>%a@ %s@ %a@ %s@]" code_cmd c "\n" code_prog p "\n" 
   | Cmd (c,t) -> fprintf form "@[<2>%a@ %s@]" code_cmd c "\n"
