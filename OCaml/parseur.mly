@@ -5,7 +5,7 @@
 %token <float> NOMBRE
 %token <bool> BOOLEAN
 %token <string> VAR
-%token PLUS MOINS FOIS GPAREN DPAREN EOL MOD GR_ST LE_ST EQ BOOL_NEG PT_VIRG TERC TERS AND OR AFFECT IF ELSE
+%token PLUS MOINS FOIS GPAREN DPAREN EOL MOD GR_ST LE_ST EQ BOOL_NEG PT_VIRG TERC TERS AND OR AFFECT IF ELSE GBRACKET DBRACKET
 %token <string> NAN
 %left PLUS MOINS
 %left FOIS
@@ -34,6 +34,7 @@ programme:
 commande: 
   expression PT_VIRG { Expr ($1, 0) }
   | PT_VIRG { Pt_Virg ((), 0) }
+  | GBRACKET programme DBRACKET { Seq ($2, 0) }
   | IF GPAREN expression DPAREN commande ELSE commande { IfElse ($3, $5, $7, 0) }
 ;
 expression:

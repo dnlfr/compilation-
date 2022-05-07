@@ -21,6 +21,7 @@ type expression_a =
 and commande_a = 
   | Expr    of expression_a * int 
   | Pt_Virg of unit * int
+  | Seq     of programme_a * int
   | IfElse  of expression_a * commande_a * commande_a * int
 
 and programme_a = 
@@ -51,13 +52,14 @@ let rec sizeOf_exp exp = match exp with
   | Ter     (exp1,exp2,exp3, t) -> t
 
 and sizeOf_cmd cmd = match cmd with 
-  | Expr    (e,t) -> t
+  | Expr    (e,t) -> (sizeOf_exp e)
   | Pt_Virg (u,t) -> t
-  | IfElse  (e,cmd1,cmd2,t) -> t
+  | Seq     (p,t) -> (sizeOf_prog p)
+  | IfElse  (e,cmd1,cmd2,t) -> (sizeOf_exp e + sizeOf_cmd cmd1 + sizeOf_cmd cmd2 + 2) 
 
 and sizeOf_prog prog = match prog with 
-  | Prog    (c,p,t) -> t
-  | Cmd     (c,t) -> t
+  | Prog    (c,p,t) -> (sizeOf_cmd c + sizeOf_prog p)
+  | Cmd     (c,t) -> (sizeOf_cmd c)
 ;;
 
 (* Fonctions d'affichage *)
@@ -88,6 +90,7 @@ and print_AST_exp form = let open Format in function
 and print_AST_cmd form = let open Format in function
   | Expr (e,t) -> fprintf form "@[<2>%a %s%i@]" print_AST_exp e " taille Expr = " (sizeOf_exp e)
   | Pt_Virg (u, t) -> fprintf form "[<2>%s@]" "; \n" 
+  | Seq (p,t) -> fprintf form "@[<2>%s@ %a%s%i@ ]" "{\n" print_AST_prog p "\n } taille Seq = " (sizeOf_prog p)  
   | IfElse (e,cmd1,cmd2,t) -> fprintf form "@[<2>%s%a%s@ %a@ %s@ %a@ %s%i@ %s%i@ %s%i%s@]"
                                 "IF (" print_AST_exp e ") \n"
                                 print_AST_cmd cmd1
@@ -130,6 +133,7 @@ and code_exp form = let open Format in function
 and code_cmd form = let open Format in function 
   | Expr (e,t) -> fprintf form "@[<2>%a%s@]" code_exp e "\n"
   | Pt_Virg (u,t) -> fprintf form "@[<2>%s@]" "\n"
+  | Seq (p,t) -> fprintf form "@[<2> %a%s@]" code_prog p "\n"
   | IfElse (e,cmd1,cmd2,t) -> fprintf form "@[<2>%a%s%i%s%a%s%i%s%a%s@]"
                               code_exp e "\nConJump " (sizeOf_cmd cmd1 + 1) "\n"
                               code_cmd cmd1
