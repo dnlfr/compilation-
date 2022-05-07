@@ -15,6 +15,8 @@ rule token = parse
   | '*' { FOIS }
   | '(' { GPAREN }
   | ')' { DPAREN }
+  | '}' { GBRACKET }
+  | '{' { DBRACKET }
   | '%' { MOD }
   | '?' { TERC }
   | ':' { TERS }
