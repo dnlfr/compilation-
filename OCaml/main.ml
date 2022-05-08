@@ -9,7 +9,7 @@ let _ =                                          (*main en OCaml*)
 		    while true do                                (*on ne s'arrête pas*)
           Parseur.commande Lexeur.token lexbuf (*parseur une ligne*)
 					|> AST.caloffset_cmd (* Calcul des offsets *)
-          |> Format.printf "%a\n%!" AST.code_cmd ;
+          |> Format.printf "%a\n%!" AST.print_AST_cmd ;
 		    done
 	  with
 	   | Lexeur.Eof          -> exit 0							 (*impossible*)
@@ -25,7 +25,7 @@ let _ =                                          (*main en OCaml*)
 	    while true do                                (*on ne s'arrête pas*)
         Parseur.commande Lexeur.token lexbuf (*parseur une ligne*)
 				|> AST.caloffset_cmd (* Calcul des offsets *)
-        |> Format.printf "%a\n%!" AST.code_cmd	 ;
+        |> Format.printf "%a\n%!" AST.print_AST_cmd	 ;
 	    done
 		  with
 		   | Lexeur.Eof          -> exit 0							 (*impossible*)
