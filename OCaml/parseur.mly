@@ -5,16 +5,16 @@
 %token <float> NOMBRE
 %token <bool> BOOLEAN
 %token <string> VAR
-%token PLUS MOINS FOIS GPAREN DPAREN EOL MOD GR_ST LE_ST EQ BOOL_NEG PT_VIRG TERC TERS AND OR AFFECT IF ELSE 
-      GBRACKET DBRACKET DO WHILE FOR
+%token PLUS MOINS FOIS GPAREN DPAREN EOL MOD GR_ST GR_EQ LE_EQ LE_ST EQ BOOL_NEG PT_VIRG TERC TERS AND OR AFFECT IF ELSE 
+      GBRACKET DBRACKET DO WHILE FOR NOT_EQ
 %token <string> NAN
 %left PLUS MOINS
 %left FOIS
 %left MOD
-%left EQ
+%left EQ NOT_EQ
 %left AND OR 
 %left AFFECT
-%left GR_ST LE_ST
+%left GR_ST LE_ST LE_EQ GR_EQ
 %left BOOL_NEG
 %left TERC
 %nonassoc UMOINS
@@ -47,8 +47,11 @@ expression:
   | expression FOIS expression { Mult ($1,$3, 0) }
   | expression MOD expression { Mod ($1, $3, 0) }
   | expression GR_ST expression { GrSt ($1, $3, 0)}
-  | expression LE_ST expression {LeSt ($1, $3, 0)}
+  | expression LE_ST expression { LeSt ($1, $3, 0)}
+  | expression LE_EQ expression { LeEq ($1, $3, 0)}
+  | expression GR_EQ expression { GrEq ($1, $3, 0)}
   | expression EQ expression {Eq ($1, $3, 0)}
+  | expression NOT_EQ expression {NotEq ($1, $3, 0) }
   | expression TERC expression TERS expression {Ter ($1, $3, $5, 0) } /* ternary operator */
   | expression AND expression { And ($1, $3, 0) }
   | expression OR expression { Or ($1, $3, 0) }

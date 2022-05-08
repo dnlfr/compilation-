@@ -6,9 +6,12 @@ type expression_a =
   | Neg     of expression_a * int
   | Num     of float * int
   | Mod     of expression_a * expression_a * int
-  | Eq      of expression_a * expression_a  * int
+  | Eq      of expression_a * expression_a * int
+  | NotEq   of expression_a * expression_a * int
   | GrSt    of expression_a * expression_a * int
   | LeSt    of expression_a * expression_a * int
+  | GrEq    of expression_a * expression_a * int
+  | LeEq    of expression_a * expression_a * int
   | BoolNeg of expression_a * int
   | Bool    of bool * int
   | NaN     of string  * int
@@ -43,8 +46,11 @@ let rec sizeOf_exp exp = match exp with
   | Neg     (e,t)   -> t
   | Num     (n,t)   -> 1
   | Eq      (g,d,t) -> t
+  | NotEq   (g,d,t) -> t
   | GrSt    (g,d,t) -> t
   | LeSt    (g,d,t) -> t
+  | GrEq    (g,d,t) -> t
+  | LeEq    (g,d,t) -> t
   | BoolNeg (e,t)   -> t
   | Bool    (b,t)   -> 1
   | NaN     (n,t)   -> 1
@@ -77,8 +83,11 @@ and caloffset_exp e = match e with
   | Neg     (e,_)   -> let e1 = caloffset_exp e in Neg(e1, (sizeOf_exp e1 + 1))
   | Num     (n,_)   -> Num(n, 1)
   | Eq      (g,d,_) -> let e1 = caloffset_exp g in let e2 = caloffset_exp d in Eq(e1, e2, (sizeOf_exp e1 + sizeOf_exp e2 + 1))
+  | NotEq   (g,d,t) -> let e1 = caloffset_exp g in let e2 = caloffset_exp d in NotEq(e1, e2, (sizeOf_exp e1 + sizeOf_exp e2 + 1))
   | GrSt    (g,d,_) -> let e1 = caloffset_exp g in let e2 = caloffset_exp d in GrSt(e1, e2, (sizeOf_exp e1 + sizeOf_exp e2 + 1))
   | LeSt    (g,d,_) -> let e1 = caloffset_exp g in let e2 = caloffset_exp d in LeSt(e1, e2, (sizeOf_exp e1 + sizeOf_exp e2 + 1))
+  | GrEq    (g,d,_) -> let e1 = caloffset_exp g in let e2 = caloffset_exp d in GrEq(e1, e2, (sizeOf_exp e1 + sizeOf_exp e2 + 1))
+  | LeEq    (g,d,_) -> let e1 = caloffset_exp g in let e2 = caloffset_exp d in LeEq(e1, e2, (sizeOf_exp e1 + sizeOf_exp e2 + 1))
   | BoolNeg (e,_)   -> let e1 = caloffset_exp e in BoolNeg(e, (sizeOf_exp e1 +1))
   | Bool    (b,_)   -> Bool(b,1)
   | NaN     (n,_)   -> NaN(n,1)
@@ -116,8 +125,11 @@ and print_AST_exp form = let open Format in function
   | Num   (n,t)   -> fprintf form "@[<2>%s@ %f%s%i@]" "Num" n " taille Num: " t
   | Neg   (e,t)   -> fprintf form "@[<2>%s@ %a%s%i@]" "Neg" print_AST_exp e " taille Neg: " t
   | Eq    (g,d,t) -> print_binaire form "Eq" g d t
+  | NotEq (g,d,t) -> print_binaire form "NotEq" g d t
   | GrSt  (g,d,t) -> print_binaire form "GrSt" g d t
   | LeSt  (g,d,t) -> print_binaire form "LeSt" g d t
+  | GrEq  (g,d,t) -> print_binaire form "GrEq" g d t
+  | LeEq  (g,d,t) -> print_binaire form "LeEq" g d t
   | BoolNeg (e,t) -> fprintf form "@[<2>%s@ %a%s%i@]" "BoolNeg" print_AST_exp e " tailleNegBool: " t
   | Bool  (b,t)   -> fprintf form "@[<2>%s@ %b%s%i@]" "CsteBo" b " taille Bool: " t
   | NaN   (n,t)   -> fprintf form "@[<2>%s@ %s%s%i@]" "Nan" n " taille NaN: " t
@@ -161,9 +173,12 @@ and code_exp form = let open Format in function
   | Num   (n,t) -> fprintf form "@[<2>%s@ %f@ %s@]" "CsteNb" n "\n"
   | Neg   (e,t) ->  fprintf form "@[<2>%a@ %s@]" code_exp e "NegaNb\n"
   | Eq    (g,d,t) -> print_post_fixe form g d "Eq"
+  | NotEq (g,d,t) -> print_post_fixe form g d "NotEq"
   | GrSt  (g,d,t) -> print_post_fixe form g d "GrSt"
   | LeSt  (g,d,t) -> print_post_fixe form g d "LeSt"
-  | BoolNeg (e,t) -> fprintf form "@[<2>%a@ %s@]" code_exp e "BoolNeg" 
+  | GrEq  (g,d,_) -> print_post_fixe form g d "GrEq"
+  | LeEq  (g,d,_) -> print_post_fixe form g d "LeEq"
+  | BoolNeg (e,t) -> fprintf form "@[<2>%a@ %s@]" code_exp e "BoolNeg \nx" 
   | Bool  (b,t)   -> fprintf form "@[<2>%s@ %b@]" "CsteBo" b 
   | NaN   (n,t)   -> fprintf form "@[<2>%s%s@]" "Nan" n 
   | And  (g,d,t) -> fprintf form "@[<2>%a@ %s%i@ %s%a%s@]" code_exp g "\nCondJump " (sizeOf_exp d + 1) "\n" code_exp d  "\n Jump 1 \n CsteBo False\n"
@@ -172,7 +187,7 @@ and code_exp form = let open Format in function
   | Affect (s,e,t) -> fprintf form "@[<2>%a@ %s%s@]" code_exp   e "\n SetVar " s 
   | Ter (exp1, exp2, exp3, t) -> fprintf form "@[<2>%a%s%i@ %s@ %a@ %s%i%s@ %a%s@]"
                               code_exp exp1 "\nCondJump " (sizeOf_exp exp2 + 1) "\n"
-                              code_exp exp1 
+                              code_exp exp2
                               "\n Jump " (sizeOf_exp exp3) "\n"
                               code_exp exp3 "\n"
 and code_cmd form = let open Format in function 
