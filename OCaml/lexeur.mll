@@ -8,6 +8,7 @@ rule token = parse
   [' ' '\t' '\n'] { token lexbuf }
   | '/''*' ([^'*'] | '*'+ [^'*''/'])* '*''/' { token lexbuf }  
   | "==" { EQ }
+  | "!=" { NOT_EQ }
   | '=' { AFFECT }
   | ['0'-'9']+ ('.' | ('.'['0'-'9']+('e''-'?['0'-'9']+)?)?) as lexem { NOMBRE(float_of_string lexem) }
   | "if" { IF }
@@ -30,9 +31,11 @@ rule token = parse
   | ':' { TERS }
   | "||" { OR }
   | "&&" { AND }
-  | "<=" { GR_ST }
+  | "<=" { GR_EQ }
+  | ">=" { LE_EQ }
   | '!' { BOOL_NEG }
   | '<' { LE_ST }
+  | '>' { GR_ST }
   | eof { raise Eof }
   | ';' { PT_VIRG }
   | _ { raise TokenInconu }
