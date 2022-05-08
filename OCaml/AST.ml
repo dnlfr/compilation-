@@ -25,7 +25,8 @@ and commande_a =
   | IfElse  of expression_a * commande_a * commande_a * int
   | DoWhile of commande_a * expression_a * int
   | While   of expression_a * commande_a * int
-  
+  | For     of expression_a * expression_a * expression_a * commande_a * int
+
 and programme_a = 
   | Prog    of commande_a * programme_a * int
   | Cmd     of commande_a * int
@@ -60,6 +61,7 @@ and sizeOf_cmd cmd = match cmd with
   | IfElse  (e,cmd1,cmd2,t) -> t
   | DoWhile (c,e,t) ->  t
   | While  (e,c,t) -> t
+  | For (exp1,exp2,exp3,c,t) -> t
 and sizeOf_prog prog = match prog with 
   | Prog    (c,p,t) -> t
   | Cmd     (c,t) -> t
@@ -80,8 +82,8 @@ and caloffset_exp e = match e with
   | BoolNeg (e,_)   -> let e1 = caloffset_exp e in BoolNeg(e, (sizeOf_exp e1 +1))
   | Bool    (b,_)   -> Bool(b,1)
   | NaN     (n,_)   -> NaN(n,1)
-  | And     (g,d,_) -> let e1 = caloffset_exp g in let e2 = caloffset_exp d in And(e1, e2, (sizeOf_exp e1 + sizeOf_exp e2 + 1))
-  | Or      (g,d,_) -> let e1 = caloffset_exp g in let e2 = caloffset_exp d in Or(e1, e2, (sizeOf_exp e1 + sizeOf_exp e2 + 1))
+  | And     (g,d,_) -> let e1 = caloffset_exp g in let e2 = caloffset_exp d in And(e1, e2, (sizeOf_exp e1 + sizeOf_exp e2 + 3))
+  | Or      (g,d,_) -> let e1 = caloffset_exp g in let e2 = caloffset_exp d in Or(e1, e2, (sizeOf_exp e1 + sizeOf_exp e2 + 3))
   | Var     (v,_) -> Var(v,1)
   | Affect  (v,e,_) -> let e1 = caloffset_exp e in Affect(v, e1, sizeOf_exp e1 +1)
   | Ter     (exp1,exp2,exp3, _) -> let e1 = caloffset_exp exp1 in let e2 = caloffset_exp exp2 in let e3 = caloffset_exp exp3 in Ter(e1, e2, e3, (sizeOf_exp e1 + sizeOf_exp e2 + sizeOf_exp e3 +2))
@@ -93,11 +95,12 @@ and caloffset_cmd c = match c with
   | IfElse  (e,cmd1,cmd2,t) -> let e1 = caloffset_exp e in let c1 = caloffset_cmd cmd1 in let c2 = caloffset_cmd cmd2
                               in IfElse(e1,c1,c2,(sizeOf_exp e1 + sizeOf_cmd c1 + sizeOf_cmd c2 + 2)) 
   | DoWhile (c,e,t) ->  let c1 = caloffset_cmd c in let e1 = caloffset_exp e in DoWhile(c1,e1, (sizeOf_cmd c1 + sizeOf_exp e1 +1))
-  | While  (e,c,t) -> let e1 = caloffset_exp e in let c1 = caloffset_cmd c in While(e1,c1, (sizeOf_cmd c1 + sizeOf_exp e1 +1))
-
+  | While   (e,c,t) -> let e1 = caloffset_exp e in let c1 = caloffset_cmd c in While(e1,c1, (sizeOf_cmd c1 + sizeOf_exp e1 + 2))
+  | For     (exp1,exp2,exp3,c,t) -> let e1 = caloffset_exp exp1 in let e2 = caloffset_exp exp2 in let e3 = caloffset_exp exp3
+                                    in let c1 = caloffset_cmd c in For(e1,e2,e3,c1, (sizeOf_exp e1 + sizeOf_exp e2 + sizeOf_exp e3 + sizeOf_cmd c1 + 2))
 and caloffset_prog p = match p with 
-  | Prog    (c,p,_) -> let c1 = caloffset_cmd c in let p1 = caloffset_prog p in Prog(c1, p1, sizeOf_cmd c1 + sizeOf_prog p1)
-  | Cmd     (c,_) -> let c1 = caloffset_cmd c in Cmd(c1, sizeOf_cmd c1)
+  | Prog    (c,p,_) -> let c1 = caloffset_cmd c in let p1 = caloffset_prog p in Prog(c1, p1, sizeOf_cmd c1 + sizeOf_prog p1 + 1)
+  | Cmd     (c,_) -> let c1 = caloffset_cmd c in Cmd(c1, sizeOf_cmd c1 + 1)
 
 ;;
 
@@ -124,7 +127,7 @@ and print_AST_exp form = let open Format in function
   | Affect (s,e,t) -> fprintf form "@[<2>%s%s%s@ %a%s%i@]"  "SetVar " s " = " print_AST_exp e " tailleAffect = " t
   | Ter (exp1, exp2, exp3, t) -> fprintf form "@[<2> %s%a%s%s%a%s%a%s%i%s%i%s%i%s@]"
                                 "Ter: " print_AST_exp exp1 ")" "?" print_AST_exp exp2 ":" print_AST_exp exp3 "\n taille Ter = " t
-                                " (ConJump : " (sizeOf_exp exp1 + 1)
+                                " (CondJump : " (sizeOf_exp exp1 + 1)
                                 " Jump : " (sizeOf_exp exp2) ")\n"
 and print_AST_cmd form = let open Format in function
   | Expr (e,t) -> fprintf form "@[<2>%a %s%i@]" print_AST_exp e " taille Expr = " t
@@ -136,11 +139,12 @@ and print_AST_cmd form = let open Format in function
                                 "\n ELSE \n"
                                 print_AST_cmd cmd2
                                 "\n taille IfElse = " t
-                                " (ConJump : " (sizeOf_cmd cmd1 + 1)
+                                " (CondJump : " (sizeOf_cmd cmd1 + 1)
                                 " Jump : " (sizeOf_cmd cmd2) ")\n"
   | DoWhile (c,e,t) -> fprintf form "@[<2>%s@ %a%s@ %a%s%i@]" "do \n" print_AST_cmd c "\n while" print_AST_exp e "\n taille DoWhile = " t 
   | While  (e,c,t) ->  fprintf form "@[<2>%s@ %a@ %s@ %a@ %s@ %i@ %s@]" "while \n" print_AST_exp e "\n" print_AST_cmd c "\n taille While = " t "\n"                        
-
+  | For (exp1,exp2,exp3,c,t) -> fprintf form "@[<2> %s%a%s%a%s%a%s%a%s%i%s@]" "For: \n Init: \n" print_AST_exp exp1 "\n Cond: " print_AST_exp exp2 "\n Increm: \n"
+                                print_AST_exp exp3 "\n Inside Loop: " print_AST_cmd c "\n tailleFor = " t "\n"
 and print_AST_prog form = let open Format in function
   | Prog (c,p,t) -> fprintf form "@[<2>%a@ %s@ %a@ %s%i%s@]" print_AST_cmd c "\n" print_AST_prog p " tailleProg = " t "\n"
   | Cmd (c,t) -> fprintf form "@[<2>%a@ %s%i@]" print_AST_cmd c " taille Commande: " t  
@@ -162,12 +166,12 @@ and code_exp form = let open Format in function
   | BoolNeg (e,t) -> fprintf form "@[<2>%a@ %s@]" code_exp e "BoolNeg" 
   | Bool  (b,t)   -> fprintf form "@[<2>%s@ %b@]" "CsteBo" b 
   | NaN   (n,t)   -> fprintf form "@[<2>%s%s@]" "Nan" n 
-  | And  (g,d,t) -> print_post_fixe form g d "And" 
-  | Or   (g,d,t) -> print_post_fixe form g d "Or" 
+  | And  (g,d,t) -> fprintf form "@[<2>%a@ %s%i@ %s%a%s@]" code_exp g "\nCondJump " (sizeOf_exp d + 1) "\n" code_exp d  "\n Jump 1 \n CsteBo False\n"
+  | Or   (g,d,t) -> fprintf form "@[<2>%a@ %s%i@ %s%a%s@]" code_exp g "\nCondJump " (sizeOf_exp d + 1) "\n CsteBo True \n Jump 1" code_exp d "\n"
   | Var (v,t) ->  fprintf form "@[<2>%s@ %s@]" "GetVar" v
   | Affect (s,e,t) -> fprintf form "@[<2>%a@ %s%s@]" code_exp   e "\n SetVar " s 
   | Ter (exp1, exp2, exp3, t) -> fprintf form "@[<2>%a%s%i@ %s@ %a@ %s%i%s@ %a%s@]"
-                              code_exp exp1 "\nConJump " (sizeOf_exp exp2 + 1) "\n"
+                              code_exp exp1 "\nCondJump " (sizeOf_exp exp2 + 1) "\n"
                               code_exp exp1 
                               "\n Jump " (sizeOf_exp exp3) "\n"
                               code_exp exp3 "\n"
@@ -176,12 +180,14 @@ and code_cmd form = let open Format in function
   | Pt_Virg (u,t) -> fprintf form "@[<2>%s@]" "\n"
   | Seq (p,t) -> fprintf form "@[<2> %a%s@]" code_prog p "\n"
   | IfElse (e,cmd1,cmd2,t) -> fprintf form "@[<2>%a%s%i%s%a%s%i%s%a%s@]"
-                              code_exp e "\nConJump " (sizeOf_cmd cmd1 + 1) "\n"
+                              code_exp e "\nCondJump " (sizeOf_cmd cmd1 + 1) "\n"
                               code_cmd cmd1
                               "\n Jump " (sizeOf_cmd cmd2) "\n"
                               code_cmd cmd2 "\n"
-  | DoWhile (c,e,t) -> fprintf form "@[<2>%s%a%s%a@ %s@ %i%s@]" "\n" code_cmd c "\n" code_exp e "ConJump " (-1 * sizeOf_cmd c + sizeOf_exp e + 1) "\n"
-  | While  (e,c,t) -> fprintf form "@[<2> %s%a%s%i%s%a%s%i%s]" "\n" code_exp e "\nConJump" (sizeOf_cmd c +1) "\n" code_cmd c "\n Jump " (-1 * t) "\n"
+  | For (exp1,exp2,exp3,c,t) ->  fprintf form "@[<2> %s%a%s%a%s%i%s%a%s%a%s%i%s@]" "\n" code_exp exp1 "\n" code_exp exp2 "\nCondJump: " (sizeOf_cmd c + sizeOf_exp exp3) 
+                                "\n" code_cmd c "\n" code_exp exp3 "\n Jump: " (-1 * (sizeOf_exp exp2 + sizeOf_cmd c + sizeOf_exp exp3 +1)) "\n"  
+  | DoWhile (c,e,t) -> fprintf form "@[<2>%s%a%s%a@ %s@ %i%s@]" "\n" code_cmd c "\n" code_exp e "CondJump " (-1 * sizeOf_cmd c + sizeOf_exp e + 1) "\n"
+  | While  (e,c,t) -> fprintf form "@[<2> %s%a%s%i%s%a%s%i%s]" "\n" code_exp e "\nCondJump " (sizeOf_cmd c + 1) "\n" code_cmd c "\n Jump " (-1 * t) "\n"
 and code_prog form = let open Format in function 
   | Prog (c,p,t) -> fprintf form "@[<2>%a@ %s@ %a@ %s@]" code_cmd c "\n" code_prog p "\n" 
   | Cmd (c,t) -> fprintf form "@[<2>%a@ %s@]" code_cmd c "\n"

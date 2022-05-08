@@ -14,6 +14,7 @@ rule token = parse
   | "else" { ELSE }
   | "do" { DO }
   | "while" { WHILE }
+  | "for" { FOR }
   | "NaN" as lexem { NAN (lexem) }
   | "true" | "false" as lexem {   BOOLEAN (bool_of_string lexem)}
   | ['a'-'z']['-' '_' '0'-'9' 'a'-'z' 'A'-'Z' ]* as lexem { VAR (lexem) }
