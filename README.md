@@ -59,6 +59,6 @@ IfElse: if(x<2) x+1; else x=0;
 ```
 DoWhile: do x+1; while x<2;
 While: while(x>5) x-1;
-For: for(i=0;i<5;i+1)
+For: for(i=0;i<5;i+1) x+1;
 
 ```
